@@ -97,10 +97,8 @@ export function Sidebar({ isOpen }: SidebarProps) {
           to="/dashboard"
           className="flex items-center gap-2 font-semibold text-sidebar-foreground"
         >
-          <div className="bg-primary p-1 rounded">
-            <Leaf className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <span className="text-xl">Soufer</span>
+          
+          <span className="text-xl">TerraTrust🌱</span>
         </Link>
       </div>
 
@@ -142,7 +140,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
       </ScrollArea>
 
       <div className="bg-sidebar-accent/50 p-4 text-xs text-sidebar-foreground/70">
-        <p>Soufer v1.0</p>
+        <p>TerraTrust🌱 v1.0</p>
         <p className="mt-1">Blockchain-Based Supply Chain Transparency</p>
       </div>
     </div>
