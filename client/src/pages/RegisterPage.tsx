@@ -128,9 +128,9 @@ export default function RegisterPage() {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="farmer">Farmer</SelectItem>
-                    <SelectItem value="distributor">Distributor</SelectItem>
+                    {/* <SelectItem value="distributor">Distributor</SelectItem>
                     <SelectItem value="financial">Financial Institution</SelectItem>
-                    <SelectItem value="regulator">Regulator</SelectItem>
+                    <SelectItem value="regulator">Regulator</SelectItem> */}
                   </SelectContent>
                 </Select>
                 <FormMessage />
