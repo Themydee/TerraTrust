@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DashboardLayout } from "@/components/layouts/DashboardLayout";
@@ -13,10 +12,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Leaf, Plus, Filter, ArrowUpDown, BarChart2 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ProducePage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("current");
+  const isMobile = useIsMobile();
 
   // Mock data for produce items
   const produceItems = [
@@ -91,14 +92,14 @@ export default function ProducePage() {
   return (
     <DashboardLayout requiredRoles={["farmer"]}>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <DashboardTitle 
             title="My Produce" 
             description="Manage your agricultural produce inventory"
           />
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
                 Add New Produce
               </Button>
@@ -169,14 +170,14 @@ export default function ProducePage() {
                   </Select>
                 </div>
               </div>
-              <DialogFooter>
-                <Button type="submit">Add Produce</Button>
+              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                <Button type="submit" className="w-full sm:w-auto">Add Produce</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-medium">Total Produce</CardTitle>
@@ -246,12 +247,12 @@ export default function ProducePage() {
         </div>
 
         <Tabs defaultValue="current" onValueChange={setActiveTab} className="w-full">
-          <div className="flex items-center justify-between mb-4">
-            <TabsList className="grid grid-cols-2 w-[400px]">
+          <div className={`${isMobile ? 'overflow-x-auto pb-2' : ''} flex items-center justify-between mb-4`}>
+            <TabsList className={`${isMobile ? 'w-[400px]' : 'w-[400px] md:w-auto'}`}>
               <TabsTrigger value="current">Current Inventory</TabsTrigger>
               <TabsTrigger value="sold">Sold History</TabsTrigger>
             </TabsList>
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Button variant="outline" size="sm" className="h-8 gap-1">
                 <Filter className="h-4 w-4" />
                 Filter
@@ -265,48 +266,50 @@ export default function ProducePage() {
                 <CardTitle>Current Produce Inventory</CardTitle>
                 <CardDescription>Manage your available produce items</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Variety</TableHead>
-                      <TableHead>Harvest Date</TableHead>
-                      <TableHead>Available</TableHead>
-                      <TableHead>Price per Unit</TableHead>
-                      <TableHead>Certifications</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredProduceItems.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell>{item.variety}</TableCell>
-                        <TableCell>{item.harvestDate}</TableCell>
-                        <TableCell>
-                          {item.availableQuantity} {item.unit}
-                          <div className="text-xs text-muted-foreground">
-                            of {item.quantity} {item.unit}
-                          </div>
-                        </TableCell>
-                        <TableCell>${item.price}/{item.unit}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {item.certifications.map(cert => (
-                              <Badge key={cert} variant="outline" className="text-xs">
-                                {cert}
-                              </Badge>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="sm">Edit</Button>
-                        </TableCell>
+              <CardContent className="px-0 sm:px-6">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="hidden md:table-cell">Variety</TableHead>
+                        <TableHead className="hidden lg:table-cell">Harvest Date</TableHead>
+                        <TableHead>Available</TableHead>
+                        <TableHead className="hidden md:table-cell">Price per Unit</TableHead>
+                        <TableHead className="hidden lg:table-cell">Certifications</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProduceItems.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">{item.name}</TableCell>
+                          <TableCell className="hidden md:table-cell">{item.variety}</TableCell>
+                          <TableCell className="hidden lg:table-cell">{item.harvestDate}</TableCell>
+                          <TableCell>
+                            {item.availableQuantity} {item.unit}
+                            <div className="text-xs text-muted-foreground">
+                              of {item.quantity} {item.unit}
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">${item.price}/{item.unit}</TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            <div className="flex flex-wrap gap-1">
+                              {item.certifications.map(cert => (
+                                <Badge key={cert} variant="outline" className="text-xs">
+                                  {cert}
+                                </Badge>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="sm">Edit</Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
               <CardFooter>
                 <div className="text-sm text-muted-foreground">
@@ -322,39 +325,41 @@ export default function ProducePage() {
                 <CardTitle>Sold Produce History</CardTitle>
                 <CardDescription>History of your sold produce items</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Variety</TableHead>
-                      <TableHead>Harvest Date</TableHead>
-                      <TableHead>Quantity Sold</TableHead>
-                      <TableHead>Price per Unit</TableHead>
-                      <TableHead>Certifications</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredProduceItems.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell>{item.variety}</TableCell>
-                        <TableCell>{item.harvestDate}</TableCell>
-                        <TableCell>{item.quantity} {item.unit}</TableCell>
-                        <TableCell>${item.price}/{item.unit}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {item.certifications.map(cert => (
-                              <Badge key={cert} variant="outline" className="text-xs">
-                                {cert}
-                              </Badge>
-                            ))}
-                          </div>
-                        </TableCell>
+              <CardContent className="px-0 sm:px-6">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="hidden md:table-cell">Variety</TableHead>
+                        <TableHead className="hidden lg:table-cell">Harvest Date</TableHead>
+                        <TableHead>Quantity Sold</TableHead>
+                        <TableHead className="hidden md:table-cell">Price per Unit</TableHead>
+                        <TableHead className="hidden lg:table-cell">Certifications</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProduceItems.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">{item.name}</TableCell>
+                          <TableCell className="hidden md:table-cell">{item.variety}</TableCell>
+                          <TableCell className="hidden lg:table-cell">{item.harvestDate}</TableCell>
+                          <TableCell>{item.quantity} {item.unit}</TableCell>
+                          <TableCell className="hidden md:table-cell">${item.price}/{item.unit}</TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            <div className="flex flex-wrap gap-1">
+                              {item.certifications.map(cert => (
+                                <Badge key={cert} variant="outline" className="text-xs">
+                                  {cert}
+                                </Badge>
+                              ))}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
               <CardFooter>
                 <div className="text-sm text-muted-foreground">

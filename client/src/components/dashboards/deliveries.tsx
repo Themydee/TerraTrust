@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PackageCheck, Truck, CalendarCheck, Package } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +7,11 @@ import { StatusBox } from "@/components/ui/status-box";
 import { DashboardTitle } from "@/components/DashboardTitle";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function DeliveriesDashboard() {
+  const isMobile = useIsMobile();
+  
   // Mock data for upcoming deliveries
   const upcomingDeliveries = [
     {
@@ -136,7 +138,7 @@ export function DeliveriesDashboard() {
         description="Manage your incoming and outgoing farm deliveries"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatusBox
           title="Upcoming Deliveries"
           value="3"
@@ -151,7 +153,7 @@ export function DeliveriesDashboard() {
           description="Pending requests"
           icon={<Package className="h-6 w-6" />}
           footer="Awaiting approval"
-          color="emerald"
+          color="violet"
         />
         <StatusBox
           title="This Month"
@@ -172,11 +174,13 @@ export function DeliveriesDashboard() {
       </div>
 
       <Tabs defaultValue="upcoming">
-        <TabsList>
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-          <TabsTrigger value="request">Request Delivery</TabsTrigger>
-        </TabsList>
+        <div className={`${isMobile ? 'overflow-x-auto pb-2' : ''}`}>
+          <TabsList className={`${isMobile ? 'w-[400px]' : ''}`}>
+            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="request">Request Delivery</TabsTrigger>
+          </TabsList>
+        </div>
         
         <TabsContent value="upcoming" className="space-y-6">
           <Card>
@@ -184,41 +188,43 @@ export function DeliveriesDashboard() {
               <CardTitle>Upcoming Deliveries</CardTitle>
               <CardDescription>Scheduled incoming and outgoing deliveries</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Items</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Source/Destination</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {upcomingDeliveries.map((delivery) => (
-                    <TableRow key={delivery.id}>
-                      <TableCell className="font-medium">{delivery.id}</TableCell>
-                      <TableCell>{delivery.date}</TableCell>
-                      <TableCell>
-                        <Badge variant={delivery.type === "Incoming" ? "default" : "secondary"}>
-                          {delivery.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{delivery.items}</TableCell>
-                      <TableCell>{getStatusBadge(delivery.status)}</TableCell>
-                      <TableCell>
-                        {delivery.provider || delivery.destination}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Details</Button>
-                      </TableCell>
+            <CardContent className="px-0 sm:px-6">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="hidden md:table-cell">Type</TableHead>
+                      <TableHead className="hidden lg:table-cell">Items</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="hidden md:table-cell">Source/Destination</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {upcomingDeliveries.map((delivery) => (
+                      <TableRow key={delivery.id}>
+                        <TableCell className="font-medium">{delivery.id}</TableCell>
+                        <TableCell>{delivery.date}</TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <Badge variant={delivery.type === "Incoming" ? "default" : "secondary"}>
+                            {delivery.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">{delivery.items}</TableCell>
+                        <TableCell>{getStatusBadge(delivery.status)}</TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {delivery.provider || delivery.destination}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="outline" size="sm">Details</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
             <CardFooter>
               <div className="flex items-center justify-between w-full">
@@ -237,36 +243,38 @@ export function DeliveriesDashboard() {
               <CardTitle>Requested Deliveries</CardTitle>
               <CardDescription>Pending delivery requests</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Items</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Notes</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {requestedDeliveries.map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">{request.id}</TableCell>
-                      <TableCell>{request.date}</TableCell>
-                      <TableCell>{request.items}</TableCell>
-                      <TableCell>{getStatusBadge(request.status)}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">{request.notes}</TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button variant="outline" size="sm" className="border-red-200 hover:bg-red-50 hover:text-red-600">
-                          Cancel
-                        </Button>
-                      </TableCell>
+            <CardContent className="px-0 sm:px-6">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="hidden md:table-cell">Items</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="hidden md:table-cell">Notes</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {requestedDeliveries.map((request) => (
+                      <TableRow key={request.id}>
+                        <TableCell className="font-medium">{request.id}</TableCell>
+                        <TableCell>{request.date}</TableCell>
+                        <TableCell className="hidden md:table-cell">{request.items}</TableCell>
+                        <TableCell>{getStatusBadge(request.status)}</TableCell>
+                        <TableCell className="hidden md:table-cell max-w-[200px] truncate">{request.notes}</TableCell>
+                        <TableCell className="text-right space-x-2">
+                          <Button variant="outline" size="sm">Edit</Button>
+                          <Button variant="outline" size="sm" className="border-red-200 hover:bg-red-50 hover:text-red-600">
+                            Cancel
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -277,41 +285,43 @@ export function DeliveriesDashboard() {
               <CardTitle>Delivery History</CardTitle>
               <CardDescription>Record of past deliveries</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Items</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Source/Destination</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {deliveryHistory.map((delivery) => (
-                    <TableRow key={delivery.id}>
-                      <TableCell className="font-medium">{delivery.id}</TableCell>
-                      <TableCell>{delivery.date}</TableCell>
-                      <TableCell>
-                        <Badge variant={delivery.type === "Incoming" ? "default" : "secondary"}>
-                          {delivery.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{delivery.items}</TableCell>
-                      <TableCell>{getStatusBadge(delivery.status)}</TableCell>
-                      <TableCell>
-                        {delivery.provider || delivery.destination}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Receipt</Button>
-                      </TableCell>
+            <CardContent className="px-0 sm:px-6">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="hidden md:table-cell">Type</TableHead>
+                      <TableHead className="hidden lg:table-cell">Items</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="hidden md:table-cell">Source/Destination</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {deliveryHistory.map((delivery) => (
+                      <TableRow key={delivery.id}>
+                        <TableCell className="font-medium">{delivery.id}</TableCell>
+                        <TableCell>{delivery.date}</TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <Badge variant={delivery.type === "Incoming" ? "default" : "secondary"}>
+                            {delivery.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">{delivery.items}</TableCell>
+                        <TableCell>{getStatusBadge(delivery.status)}</TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {delivery.provider || delivery.destination}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="outline" size="sm">Receipt</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
             <CardFooter>
               <div className="flex items-center justify-end space-x-2">
@@ -400,9 +410,9 @@ export function DeliveriesDashboard() {
                 </div>
               </form>
             </CardContent>
-            <CardFooter className="flex justify-end gap-3">
-              <Button variant="outline">Cancel</Button>
-              <Button>Submit Request</Button>
+            <CardFooter className="flex flex-col sm:flex-row sm:justify-end gap-3">
+              <Button variant="outline" className="w-full sm:w-auto">Cancel</Button>
+              <Button className="w-full sm:w-auto">Submit Request</Button>
             </CardFooter>
           </Card>
         </TabsContent>

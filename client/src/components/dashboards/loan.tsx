@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Calendar, CircleDollarSign, Clock, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,9 +9,11 @@ import { DashboardTitle } from "@/components/DashboardTitle";
 import { LoanApplicationTable } from "@/components/tables/LoanApplicationTable";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function LoansDashboard() {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Mock data for active loans
   const activeLoans = [
@@ -62,7 +63,7 @@ export function LoansDashboard() {
         description="Manage your agricultural loans and financing"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatusBox
           title="Total Active Loans"
           value="2"
@@ -98,18 +99,20 @@ export function LoansDashboard() {
       </div>
 
       <Tabs defaultValue="active">
-        <TabsList>
-          <TabsTrigger value="active">Active Loans</TabsTrigger>
-          <TabsTrigger value="history">Payment History</TabsTrigger>
-          <TabsTrigger value="apply">Apply for Loan</TabsTrigger>
-        </TabsList>
+        <div className={`${isMobile ? 'overflow-x-auto pb-2' : ''}`}>
+          <TabsList className={`${isMobile ? 'w-[400px]' : ''}`}>
+            <TabsTrigger value="active">Active Loans</TabsTrigger>
+            <TabsTrigger value="history">Payment History</TabsTrigger>
+            <TabsTrigger value="apply">Apply for Loan</TabsTrigger>
+          </TabsList>
+        </div>
         
         <TabsContent value="active" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {activeLoans.map((loan) => (
               <Card key={loan.id}>
                 <CardHeader>
-                  <CardTitle className="flex justify-between">
+                  <CardTitle className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                     <span>Loan #{loan.id}</span>
                     <span className="text-primary">${loan.amount}</span>
                   </CardTitle>
@@ -144,7 +147,7 @@ export function LoansDashboard() {
                 </CardContent>
                 <CardFooter>
                   <div className="w-full space-y-2">
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm gap-2">
                       <span className="text-muted-foreground">Next payment:</span>
                       <span className="font-medium">${loan.nextPayment.amount} due on {loan.nextPayment.date}</span>
                     </div>
@@ -162,20 +165,22 @@ export function LoansDashboard() {
               <CardTitle>Payment History</CardTitle>
               <CardDescription>Record of your previous loan payments</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {paymentHistory.map((payment) => (
-                  <div key={payment.id} className="flex justify-between items-center border-b pb-3 last:border-0 last:pb-0">
-                    <div>
-                      <div className="font-medium">Payment #{payment.id}</div>
-                      <div className="text-sm text-muted-foreground">{payment.date}</div>
+            <CardContent className="px-0 sm:px-6">
+              <div className="overflow-x-auto">
+                <div className="min-w-[600px] sm:min-w-0 space-y-4">
+                  {paymentHistory.map((payment) => (
+                    <div key={payment.id} className="flex justify-between items-center border-b pb-3 last:border-0 last:pb-0 px-6 sm:px-0">
+                      <div>
+                        <div className="font-medium">Payment #{payment.id}</div>
+                        <div className="text-sm text-muted-foreground">{payment.date}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">${payment.amount}</div>
+                        <div className="text-xs text-emerald-600">Completed</div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-medium">${payment.amount}</div>
-                      <div className="text-xs text-emerald-600">Completed</div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -235,13 +240,13 @@ export function LoansDashboard() {
                 </div>
               </form>
             </CardContent>
-            <CardFooter className="flex justify-end gap-3">
-              <Button variant="outline">Cancel</Button>
+            <CardFooter className="flex flex-col sm:flex-row sm:justify-end gap-3">
+              <Button variant="outline" className="w-full sm:w-auto">Cancel</Button>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button>Submit Application</Button>
+                  <Button className="w-full sm:w-auto">Submit Application</Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-md">
                   <DialogHeader>
                     <DialogTitle>Confirm Loan Application</DialogTitle>
                     <DialogDescription>
@@ -249,9 +254,9 @@ export function LoansDashboard() {
                       will be analyzed to determine eligibility.
                     </DialogDescription>
                   </DialogHeader>
-                  <DialogFooter>
-                    <Button variant="outline" className="mt-2 sm:mt-0">Cancel</Button>
-                    <Button onClick={handleApplyForLoan}>Confirm Submission</Button>
+                  <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                    <Button variant="outline" className="w-full sm:w-auto">Cancel</Button>
+                    <Button onClick={handleApplyForLoan} className="w-full sm:w-auto">Confirm Submission</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>

@@ -1,10 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/navigation/Navbar";
 import { Sidebar } from "@/components/navigation/Sidebar";
 import { UserRole } from "@/types/user";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -16,7 +17,17 @@ export function DashboardLayout({
   requiredRoles,
 }: DashboardLayoutProps) {
   const { user, isAuthenticated } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  
+  // Close sidebar by default on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    } else {
+      setSidebarOpen(true);
+    }
+  }, [isMobile]);
 
   // If user is not authenticated, redirect to login
   if (!isAuthenticated) {
@@ -45,7 +56,7 @@ export function DashboardLayout({
       {/* Main Content */}
       <div className="flex-1">
         <Navbar toggleSidebar={toggleSidebar} />
-        <main className="p-4 md:p-6 max-w-7xl mx-auto">
+        <main className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto">
           {children}
         </main>
       </div>
