@@ -174,13 +174,7 @@ export function FarmerDashboard() {
       </div>
 
       {/* Recent Transactions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-          <CardDescription>Latest blockchain records for your produce</CardDescription>
-        </CardHeader>
-        <TransactionTable />
-      </Card>
+      
     </div>
   );
 }

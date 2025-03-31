@@ -13,6 +13,19 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile"
+
+//farmer common items
+import Produce from "./components/commonitems/farmer/produce"
+// import Loan from "./components/commonitems/farmer/"
+// import Delivery from "./components/commonitems/farmer/deliveries"
+// import Report from "./components/commonitems/farmer/reports"
+
+
+//Add and Edit pages
+import Add from "@/components/commonitems/farmer/forms/create"
+import Edit from "@/components/commonitems/farmer/forms/edit"
+// import Transaction from "./components/tables/TransactionTable"
 
 const queryClient = new QueryClient();
 
@@ -31,15 +44,15 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             
             {/* Placeholder routes for other dashboard pages */}
-            <Route path="/profile" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Dashboard />} />
             
             {/* Farmer routes */}
-            <Route path="/produce" element={<Dashboard />} />
+            <Route path="/produce" element={<Produce />} />
             <Route path="/loans" element={<Dashboard />} />
             <Route path="/deliveries" element={<Dashboard />} />
             <Route path="/reports" element={<Dashboard />} />
-            
+             
             {/* Distributor routes */}
             <Route path="/shipments" element={<Dashboard />} />
             <Route path="/inventory" element={<Dashboard />} />
@@ -57,6 +70,12 @@ const App = () => (
             
             {/* Catch-all 404 route */}
             <Route path="*" element={<NotFound />} />
+
+            {/* Add and Edit Routes */}
+            <Route path="/produce/add" element={<Add />} />
+            <Route path="/produce/edit" element={<Edit />} />
+
+            {/* <Route path="/transaction" element={<Transaction />} /> */}
           </Routes>
         </BrowserRouter>
       </AuthProvider>

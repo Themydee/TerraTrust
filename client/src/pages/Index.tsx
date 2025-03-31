@@ -71,14 +71,14 @@ export default function Index() {
                 across the agricultural supply chain, connecting farmers, distributors,
                 financial institutions, and regulators on a single platform.
               </p>
-              <div className="flex flex-wrap gap-4">
+              {/* <div className="flex flex-wrap gap-4">
                 <Button size="lg" asChild>
                   <Link to="/register">Get Started</Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                   <Link to="/login">Log In</Link>
                 </Button>
-              </div>
+              </div> */}
             </div>
             <div className="lg:w-1/2">
               <div className="bg-white rounded-xl shadow-lg p-6 border">

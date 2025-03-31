@@ -36,8 +36,6 @@ export function Sidebar({ isOpen }: SidebarProps) {
   const getNavItems = () => {
     const commonItems = [
       { title: "Dashboard", path: "/dashboard", icon: Home },
-      { title: "Profile", path: "/profile", icon: User },
-      { title: "Settings", path: "/settings", icon: Settings },
     ];
 
     switch (user?.role) {
@@ -133,7 +131,10 @@ export function Sidebar({ isOpen }: SidebarProps) {
           <div className="mt-3 px-2 space-y-1">
             <Button variant="ghost" className="w-full justify-start gap-3">
               <Layers className="h-5 w-5" />
-              <span>View Transactions</span>
+              <Link to="/transaction">
+                <span>View Transactions</span>
+              </Link>
+
             </Button>
           </div>
         </div>
