@@ -17,14 +17,12 @@ import Profile from "./pages/Profile"
 
 //farmer common items
 import Produce from "./components/commonitems/farmer/produce"
-// import Loan from "./components/commonitems/farmer/"
-// import Delivery from "./components/commonitems/farmer/deliveries"
+import Loan from "@/components/commonitems/farmer/loan"
+import Delivery from "@/components/commonitems/farmer/deliveries"
 // import Report from "./components/commonitems/farmer/reports"
 
 
-//Add and Edit pages
-import Add from "@/components/commonitems/farmer/forms/create"
-import Edit from "@/components/commonitems/farmer/forms/edit"
+
 // import Transaction from "./components/tables/TransactionTable"
 
 const queryClient = new QueryClient();
@@ -49,8 +47,8 @@ const App = () => (
             
             {/* Farmer routes */}
             <Route path="/produce" element={<Produce />} />
-            <Route path="/loans" element={<Dashboard />} />
-            <Route path="/deliveries" element={<Dashboard />} />
+            <Route path="/loans" element={<Loan />} />
+            <Route path="/deliveries" element={<Delivery />} />
             <Route path="/reports" element={<Dashboard />} />
              
             {/* Distributor routes */}
@@ -71,9 +69,7 @@ const App = () => (
             {/* Catch-all 404 route */}
             <Route path="*" element={<NotFound />} />
 
-            {/* Add and Edit Routes */}
-            <Route path="/produce/add" element={<Add />} />
-            <Route path="/produce/edit" element={<Edit />} />
+            
 
             {/* <Route path="/transaction" element={<Transaction />} /> */}
           </Routes>
