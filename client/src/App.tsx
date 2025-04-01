@@ -19,7 +19,10 @@ import Profile from "./pages/Profile"
 import Produce from "./components/commonitems/farmer/produce"
 import Loan from "@/components/commonitems/farmer/loan"
 import Delivery from "@/components/commonitems/farmer/deliveries"
-// import Report from "./components/commonitems/farmer/reports"
+// distributor common items
+import Inventory from "./components/commonitems/distributor/Inventory";
+import Orders from "./components/commonitems/distributor/orders";
+import Shipment from "./components/commonitems/distributor/shipments"
 
 
 
@@ -43,18 +46,16 @@ const App = () => (
             
             {/* Placeholder routes for other dashboard pages */}
             <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Dashboard />} />
             
             {/* Farmer routes */}
             <Route path="/produce" element={<Produce />} />
             <Route path="/loans" element={<Loan />} />
             <Route path="/deliveries" element={<Delivery />} />
-            <Route path="/reports" element={<Dashboard />} />
              
             {/* Distributor routes */}
-            <Route path="/shipments" element={<Dashboard />} />
-            <Route path="/inventory" element={<Dashboard />} />
-            <Route path="/orders" element={<Dashboard />} />
+            <Route path="/shipments" element={<Shipment />} />
+            <Route path="/inventory" element={<Inventory />} />
+            <Route path="/orders" element={<Orders />} />
             
             {/* Financial routes */}
             <Route path="/disbursements" element={<Dashboard />} />

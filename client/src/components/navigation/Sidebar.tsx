@@ -45,7 +45,6 @@ export function Sidebar({ isOpen }: SidebarProps) {
           { title: "My Produce", path: "/produce", icon: Leaf },
           { title: "Loans", path: "/loans", icon: CircleDollarSign },
           { title: "Deliveries", path: "/deliveries", icon: Truck },
-          { title: "Reports", path: "/reports", icon: FileText },
         ];
 
       case "distributor":
@@ -54,7 +53,6 @@ export function Sidebar({ isOpen }: SidebarProps) {
           { title: "Shipments", path: "/shipments", icon: Truck },
           { title: "Inventory", path: "/inventory", icon: Package },
           { title: "Orders", path: "/orders", icon: FileText },
-          { title: "Reports", path: "/reports", icon: BarChart2 },
         ];
 
       case "financial":
@@ -63,7 +61,6 @@ export function Sidebar({ isOpen }: SidebarProps) {
           { title: "Loans", path: "/loans", icon: CircleDollarSign },
           { title: "Disbursements", path: "/disbursements", icon: Wallet },
           { title: "Repayments", path: "/repayments", icon: FileBarChart },
-          { title: "Reports", path: "/reports", icon: BarChart4 },
         ];
 
       case "regulator":
@@ -72,7 +69,6 @@ export function Sidebar({ isOpen }: SidebarProps) {
           { title: "Overview", path: "/overview", icon: Layers },
           { title: "Compliance", path: "/compliance", icon: ShieldCheck },
           { title: "Participants", path: "/participants", icon: Users },
-          { title: "Reports", path: "/reports", icon: BarChart4 },
           { title: "Documentation", path: "/documentation", icon: BookOpen },
         ];
 
