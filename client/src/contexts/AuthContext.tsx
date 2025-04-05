@@ -1,6 +1,8 @@
 
 import { User as LucideUser } from "lucide-react";
 import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "sonner";
 
 type UserRole = "farmer" | "distributor" | "financial" | "regulator" | null;
 
@@ -56,24 +58,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   };
 
-  const register = async (email: string, password: string, name: string, role: UserRole) => {
+  const register = async (
+    email: string,
+    password: string,
+    name: string,
+    role: UserRole
+  ) => {
     setLoading(true);
-    
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    // Create a mock user (in a real app, this would register via an API)
-    const newUser: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      email,
-      name,
-      role
-    };
-    
-    setUser(newUser);
-    localStorage.setItem("user", JSON.stringify(newUser));
-    setLoading(false);
+  
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/signup", // replace with your backend URL
+        { name, email, password, role },
+        {
+          withCredentials: true, // ✅ allow cookies to be set
+        }
+      );
+  
+      // Assuming the response has a 'user' field with the registered user data
+      const registeredUser = response.data.user;
+  
+      // Check if user data is available
+      if (!registeredUser) {
+        throw new Error('User data not returned from server');
+      }
+  
+      // Save user info to state and localStorage (optional)
+      const userData: User = {
+        id: registeredUser._id,
+        email: registeredUser.email,
+        name: registeredUser.name,
+        role: registeredUser.role,
+      };
+  
+      setUser(userData); // Set user state in your Auth context
+      localStorage.setItem("user", JSON.stringify(userData)); // Store user in localStorage for persistence
+    } catch (error: any) {
+      console.error("Registration failed:", error.response?.data || error.message);
+
+      if (error.response?.data) {
+        toast.error(error.response.data.message || 'Registration failed');
+      } else {
+        toast.error('Something went wrong, please try again later.');
+      }
+      throw error;
+  
+      // Provide user feedback based on error response (you can customize this further)
+      const errorMessage = error.response?.data?.message || 'Registration failed, please try again.';
+      toast.error(errorMessage); 
+      throw error; // Rethrow error if needed for further handling
+
+      
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   const logout = () => {
     localStorage.removeItem("user");

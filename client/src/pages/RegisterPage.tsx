@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import axios from "axios";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
