@@ -10,13 +10,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());app.use(cors({
-    origin: "http://localhost:8080", // your frontend origin
+    origin: "http://localhost:8080", //  frontend origin
     credentials: true, // allow cookies
     methods: [ "GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
   
-app.use(express.json()); // ✅ this line is essential
+app.use(express.json()); 
 // Routes
 app.get("/", (req, res) => {
     res.send("Hello world!");

@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 
 
@@ -43,50 +44,65 @@ export const signup = async (req, res) => {
         },
       });
       
-    } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
-    }
-  };
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+export const login = async (req, res) => {
+  const { email, password } = req.body;
   
+  try {
+      // Find user by email
+      const user = await User.findOne({ email });
+      
+      // If no user found
+      if (!user) {
+          return res.status(400).json({ success: false, message: "Invalid credentials" });
+      }
 
-export const login = async(req,res) => {
-    const {email, password} = req.body;
-    try {
-        const user = await User.findOne({ email})
-        if(!user){
-            return res.status(400).json({success:false, message: "Invalid credentials"})
-        }
+      // Check if the password matches the hashed password
+      const passwordMatches = await bcryptjs.compare(password, user.password);
+      if (!passwordMatches) {
+          return res.status(400).json({ success: false, message: "Invalid credentials" });
+      }
 
-        const passwordMatches = await bcryptjs.compare(password, user.password)
-        if (!passwordMatches) {
-            return res.status(400).json({success: false, message: "Invalid credentials"})
-        }
+      // Generate the JWT token here
+      const token = jwt.sign(
+          { userId: user._id, email: user.email },
+          process.env.JWT_SECRET_KEY, 
+          { expiresIn: '1h' }  
+      );
 
-        generateTokenAndSetCookie(res, user._id); 
+      // Set token in a cookie (optional)
+      res.cookie("token", token, {
+          httpOnly: true,  
+          maxAge: 3600000, // 1 hour
+      });
 
-        user.lastLogin = new Date();
-        await user.save();
+      // Update the user's last login
+      user.lastLogin = new Date();
+      await user.save();
 
-        res.status(200).json({
-            success: true,
-            message: "You have been successfully logged In",
-            token,
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                lastLogin: user.lastLogin
-            }
-        })
+      // Send back the response with the token and user details
+      res.status(200).json({
+          success: true,
+          message: "You have been successfully logged in",
+          token,
+          user: {
+              _id: user._id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              isVerified: user.isVerified,
+              lastLogin: user.lastLogin,
+          }
+      });
 
-
-
-    } catch (error) {
-        console.error("Login error", error);
-        res.status(500).json({ success: false, message: "Internal Server Error"})
-    }
-}
-
+  } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
 
 export const logout =  async(req,res) => {
     try {

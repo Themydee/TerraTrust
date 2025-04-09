@@ -51,12 +51,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setLoading(true);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try{
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        { email, password },
+        {
+          withCredentials: true, // ✅ allow cookies to be set
+        }
+      );
 
-    setUser(user); // Replace with actual user data when implementing login logic
-    localStorage.setItem("user", JSON.stringify(user));
-    setLoading(false);
+      const {token, user} = response.data
+
+      localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+
+    // Update the user state (you might use a context for this)
+    setUser(user);
+
+    toast.success("Logged in successfully");
+    } catch (error) {
+      console.error("Login error:", error);
+
+      if(error.response){
+        toast.error(error.response.data.message || 'Login failed');
+      } else {
+        toast.error('Something went wrong, please try again later.');
+      }
+    } finally { 
+      setLoading(false);
+    }
   };
 
   const register = async (
@@ -118,8 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   
 
-  const logout = async () => {
-    const navigate = useNavigate();
+  const logout = async (navigate: ReturnType<typeof useNavigate>) => {
 
     try {
       await axios.post("http://localhost:5000/api/auth/logout");
