@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());app.use(cors({
-    origin: "http://localhost:8080", // your frontend origin
+    origin: "https://terra-sage.vercel.app/", // your frontend origin
     credentials: true, // allow cookies
     methods: [ "GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
