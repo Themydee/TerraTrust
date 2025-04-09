@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/signup", // replace with your backend URL
+        "https://terratrust.onrender.com/api/auth/signup", // replace with your backend URL
         { name, email, password, role },
         {
           withCredentials: true, // ✅ allow cookies to be set
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async (navigate: ReturnType<typeof useNavigate>) => {
 
     try {
-      await axios.post("http://localhost:5000/api/auth/logout");
+      await axios.post("https://terratrust.onrender.com/api/auth/logout");
 
       localStorage.removeItem("user");
 
