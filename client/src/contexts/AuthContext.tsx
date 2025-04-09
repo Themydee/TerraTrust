@@ -1,5 +1,6 @@
 
 import { User as LucideUser } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -115,9 +116,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
+  
+
+  const logout = async () => {
+    const navigate = useNavigate();
+
+    try {
+      await axios.post("http://localhost:5000/api/auth/logout");
+
+      localStorage.removeItem("user");
+
+      setUser(null);
+      toast.success("Logged out successfully");
+
+      navigate("/login");
+    } catch (error) {
+        console.error("Logout failed:", error);
+    }
   };
 
   const resetPassword = async (email: string) => {
