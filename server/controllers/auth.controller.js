@@ -2,7 +2,8 @@ import { User } from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
-
+import transporter from "../mailer/mailsend.config.js";
+import { VERIFICATION_EMAIL_TEMPLATE, WELCOME_EMAIL_TEMPLATE } from "../mailer/email.template.js";
 
 
 export const signup = async (req, res) => {
@@ -19,7 +20,7 @@ export const signup = async (req, res) => {
       }
   
       const encryptedPassword = await bcryptjs.hash(password, 10);
-      const verificationToken = Math.floor(100000 * Math.random() * 900000).toString();
+      const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
   
       const newUser = new User({
         name,
@@ -29,9 +30,24 @@ export const signup = async (req, res) => {
         verificationToken,
         verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
       });
+
+
+
   
       await newUser.save();
       generateTokenAndSetCookie(res, newUser._id);
+
+      // Send verification email 
+      const mailOptions = {
+        from: process.env.SENDER_EMAIL,
+        to: email,
+        subject: "Verify your email",
+        html: VERIFICATION_EMAIL_TEMPLATE.replace("{verificationCode}", verificationToken),
+        category: "verification",
+      }
+
+      await transporter.sendMail(mailOptions)
+
   
       res.status(201).json({
         success: true,
@@ -113,4 +129,56 @@ export const logout =  async(req,res) => {
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
-  
+
+export const verifyEmail = async (req, res) => {
+  const { code } = req.body;
+
+  try {
+    // Debug: log received code
+    console.log("Received verification code:", code);
+
+    const user = await User.findOne({
+      verificationToken: code,
+      verificationTokenExpiresAt: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      console.log("Verification failed: Invalid or expired token.");
+      return res.status(400).json({ success: false, message: "Invalid or expired verification code" });
+    }
+
+    // Mark as verified and clear token
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpiresAt = undefined;
+    await user.save();
+
+    // Send welcome email
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: user.email,
+      subject: "Welcome to the platform!",
+      html: WELCOME_EMAIL_TEMPLATE.replace("{name}", user.name),
+      category: "welcome",
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified,
+        lastLogin: user.lastLogin,
+      }
+    });
+
+  } catch (error) {
+    console.error("Verification error:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
