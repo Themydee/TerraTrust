@@ -19,6 +19,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
+  verifyUser: (verificationCode: string) => Promise<void>;
   logout: () => void;
   resetPassword: (email: string) => Promise<void>;
   isAuthenticated: boolean;
@@ -92,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
     try {
       const response = await axios.post(
-        "https://terratrust.onrender.com/api/auth/signup", // replace with your backend URL
+        "http://localhost:5000/api/auth/signup", // replace with your backend URL
         { name, email, password, role },
         {
           withCredentials: true, // ✅ allow cookies to be set
@@ -137,14 +138,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   };
-  
+
+  const verifyUser = async (verificationCode: string) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/verify-email", 
+         { code: verificationCode }
+      );
+      if (response.status === 200) {
+        toast.success("Email verified successfully");
+      }
+    } catch (error) {
+      console.error("Verification failed:", error);
+      toast.error("Verification failed. Please try again.");
+    }
+  };
 
   
 
   const logout = async (navigate: ReturnType<typeof useNavigate>) => {
 
     try {
-      await axios.post("https://terratrust.onrender.com/api/auth/logout");
+      await axios.post("http://localhost:5000/api/auth/logout");
 
       localStorage.removeItem("user");
 
@@ -165,6 +180,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // In a real app, this would trigger a password reset email
   };
 
+  
+
   return (
     <AuthContext.Provider
       value={{
@@ -173,6 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        verifyUser,
         resetPassword,
         isAuthenticated: !!user,
       }}

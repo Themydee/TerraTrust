@@ -64,7 +64,7 @@ export default function RegisterPage() {
     try {
       await register(data.email, data.password, data.name, data.role);
       toast.success("Registration successful");
-      navigate("/dashboard");
+      navigate("/verify");
     } catch (error) {
       toast.error("Registration failed. Please try again.");
       console.error(error);

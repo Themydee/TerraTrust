@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile"
+import Verify from "./pages/VerifyPage";
 
 //farmer common items
 import Produce from "./components/commonitems/farmer/produce"
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/verify" element={<Verify />} />
             
             {/* Placeholder routes for other dashboard pages */}
             <Route path="/profile" element={<Profile />} />
