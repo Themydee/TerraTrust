@@ -68,6 +68,12 @@ export default function RegisterPage() {
     } catch (error) {
       toast.error("Registration failed. Please try again.");
       console.error(error);
+
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);  // Show actual backend message
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
     }
   };
 

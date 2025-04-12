@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import { DB } from "./db/connect.js";
 import authRoutes from "./routes/auth.route.js";
+import produceRoutes from "./routes/produce.route.js";
 import cors from "cors"
 
 
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
     res.send("Hello world!");
 });
 app.use("/api/auth", authRoutes);
+app.use("/api/produce", produceRoutes);
 
 // Start Server
 app.listen(PORT, () => {

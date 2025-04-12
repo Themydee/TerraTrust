@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+// React imports and hooks
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+
+// UI Components
 import { DashboardLayout } from "@/components/layouts/DashboardLayout";
 import { DashboardTitle } from "@/components/DashboardTitle";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -11,92 +14,111 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Leaf, Plus, Filter, ArrowUpDown, BarChart2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+interface ProduceItem {
+  name: string;
+  variety: string;
+  quantity: number;
+  price: number;
+  unit: string;
+  harvestDate: string;
+  certifications: string[];
+  availableQuantity: number; // Added this line
+  status: string; // Added this line
+}
 
 export default function ProducePage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("current");
+  const [produceItems, setProduceItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [name, setName] = useState("");
+  const [variety, setVariety] = useState("");
+  const [quantity, setQuantity] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [unit, setUnit] = useState("kg");
+  const [harvestDate, setHarvestDate] = useState("");
+  const [certifications, setCertifications] = useState<string[]>([]);
+  const [loadingAdd, setLoadingAdd] = useState(false);
   const isMobile = useIsMobile();
 
-  // Mock data for produce items
-  const produceItems = [
-    { 
-      id: 1, 
-      name: "Organic Tomatoes", 
-      variety: "Roma",
-      quantity: 500, 
-      availableQuantity: 350,
-      unit: "kg", 
-      price: 2.5,
-      harvestDate: "2023-10-15",
-      certifications: ["Organic", "Fair Trade"],
-      status: "available" 
-    },
-    { 
-      id: 2, 
-      name: "Sweet Corn", 
-      variety: "Golden Bantam",
-      quantity: 1200, 
-      availableQuantity: 1200,
-      unit: "kg", 
-      price: 1.8,
-      harvestDate: "2023-10-20",
-      certifications: ["Pesticide-free"],
-      status: "available" 
-    },
-    { 
-      id: 3, 
-      name: "Bell Peppers", 
-      variety: "California Wonder",
-      quantity: 300, 
-      availableQuantity: 120,
-      unit: "kg", 
-      price: 3.2,
-      harvestDate: "2023-10-12",
-      certifications: ["Organic"],
-      status: "available" 
-    },
-    { 
-      id: 4, 
-      name: "Carrots", 
-      variety: "Nantes",
-      quantity: 800, 
-      availableQuantity: 0,
-      unit: "kg", 
-      price: 1.5,
-      harvestDate: "2023-09-30",
-      certifications: ["Organic", "Local"],
-      status: "sold" 
-    },
-    { 
-      id: 5, 
-      name: "Lettuce", 
-      variety: "Romaine",
-      quantity: 200, 
-      availableQuantity: 0,
-      unit: "kg", 
-      price: 2.0,
-      harvestDate: "2023-09-25",
-      certifications: ["Pesticide-free", "Non-GMO"],
-      status: "sold" 
-    }
-  ];
+  useEffect(() => {
+    const fetchProduceData = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/produce/fetch");
+        const data = await response.json();
+        setProduceItems(data);
+      } catch (error) {
+        console.error("Error fetching produce data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Filter produce items based on active tab
-  const filteredProduceItems = produceItems.filter(item => {
-    if (activeTab === "current") return item.status === "available";
-    return item.status === "sold";
-  });
+    fetchProduceData();
+  }, []);
+
+  const handleAddProduce = async () => {
+    setLoadingAdd(true);
+    try {
+      const newProduce: ProduceItem = {
+        name,
+        variety,
+        quantity,
+        price,
+        unit,
+        harvestDate,
+        certifications,
+        availableQuantity: quantity,
+        status: "available", // Ensure the status is set
+      };
+
+      const response = await fetch("http://localhost:5000/api/produce/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newProduce),
+      });
+
+      if (response.ok) {
+        const addedProduce = await response.json();
+        console.log("Added produce:", addedProduce);
+        setProduceItems((prevItems) => (Array.isArray(prevItems) ? [...prevItems, addedProduce] : [addedProduce]));
+        console.log("Updated produce items:", produceItems);
+        resetForm();
+      } else {
+        console.error("Error adding produce:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error adding produce:", error);
+    } finally {
+      setLoadingAdd(false);
+    }
+  };
+
+  const resetForm = () => {
+    setName("");
+    setVariety("");
+    setQuantity(0);
+    setPrice(0);
+    setUnit("kg");
+    setHarvestDate("");
+    setCertifications([]);
+  };
+
+  const filteredProduceItems = Array.isArray(produceItems)
+  ? produceItems.filter((item) => {
+      if (activeTab === "current") return item.status === "available";
+      return item.status === "sold";
+    })
+  : [];
 
   return (
     <DashboardLayout requiredRoles={["farmer"]}>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <DashboardTitle 
-            title="My Produce" 
-            description="Manage your agricultural produce inventory"
-          />
+          <DashboardTitle title="My Produce" description="Manage your agricultural produce inventory" />
           <Dialog>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2 w-full sm:w-auto">
@@ -107,29 +129,21 @@ export default function ProducePage() {
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Add New Produce</DialogTitle>
-                <DialogDescription>
-                  Enter the details of your new produce item.
-                </DialogDescription>
+                <DialogDescription>Enter the details of your new produce item.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Name
-                  </Label>
-                  <Input id="name" placeholder="Tomatoes, Corn, etc." className="col-span-3" />
+                  <Label htmlFor="name" className="text-right">Name</Label>
+                  <Input id="name" placeholder="Tomatoes, Corn, etc." className="col-span-3" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="variety" className="text-right">
-                    Variety
-                  </Label>
-                  <Input id="variety" placeholder="Roma, Golden Bantam, etc." className="col-span-3" />
+                  <Label htmlFor="variety" className="text-right">Variety</Label>
+                  <Input id="variety" placeholder="Roma, Golden Bantam, etc." className="col-span-3" value={variety} onChange={(e) => setVariety(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="quantity" className="text-right">
-                    Quantity
-                  </Label>
-                  <Input id="quantity" type="number" placeholder="100" className="col-span-2" />
-                  <Select defaultValue="kg">
+                  <Label htmlFor="quantity" className="text-right">Quantity</Label>
+                  <Input id="quantity" type="number" className="col-span-2" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+                  <Select defaultValue="kg" onValueChange={setUnit}>
                     <SelectTrigger id="unit">
                       <SelectValue placeholder="Unit" />
                     </SelectTrigger>
@@ -141,22 +155,16 @@ export default function ProducePage() {
                   </Select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="price" className="text-right">
-                    Price (USD)
-                  </Label>
-                  <Input id="price" type="number" step="0.01" placeholder="0.00" className="col-span-3" />
+                  <Label htmlFor="price" className="text-right">Price (₦)</Label>
+                  <Input id="price" type="number" className="col-span-3" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="harvest-date" className="text-right">
-                    Harvest Date
-                  </Label>
-                  <Input id="harvest-date" type="date" className="col-span-3" />
+                  <Label htmlFor="harvest-date" className="text-right">Harvest Date</Label>
+                  <Input id="harvest-date" type="date" className="col-span-3" value={harvestDate} onChange={(e) => setHarvestDate(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="certifications" className="text-right">
-                    Certifications
-                  </Label>
-                  <Select defaultValue="organic">
+                  <Label htmlFor="certifications" className="text-right">Certifications</Label>
+                  <Select onValueChange={(value) => setCertifications(value ? [value] : [])}>
                     <SelectTrigger id="certifications" className="col-span-3">
                       <SelectValue placeholder="Select certifications" />
                     </SelectTrigger>
@@ -170,95 +178,20 @@ export default function ProducePage() {
                   </Select>
                 </div>
               </div>
-              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-                <Button type="submit" className="w-full sm:w-auto">Add Produce</Button>
+              <DialogFooter>
+                <Button type="button" onClick={handleAddProduce} disabled={loadingAdd}>
+                  {loadingAdd ? "Adding..." : "Add Produce"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-medium">Total Produce</CardTitle>
-              <div className="text-2xl font-bold">3,000 kg</div>
-              <CardDescription>5 different produce varieties</CardDescription>
-            </CardHeader>
-            <CardContent className="pb-3">
-              <div className="text-xs text-muted-foreground mb-1">Storage Capacity Used</div>
-              <div className="w-full bg-secondary/20 h-2 rounded-full overflow-hidden">
-                <div className="bg-primary h-full rounded-full" style={{ width: "65%" }} />
-              </div>
-              <div className="flex justify-between text-xs mt-1">
-                <span>65% used</span>
-                <span>35% available</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-medium">Available for Sale</CardTitle>
-              <div className="text-2xl font-bold">1,670 kg</div>
-              <CardDescription>3 active listings</CardDescription>
-            </CardHeader>
-            <CardContent className="pb-3">
-              <div className="flex items-center gap-2">
-                <Leaf className="h-4 w-4 text-green-500" />
-                <span className="text-sm">All produce verified on blockchain</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-medium">Market Trends</CardTitle>
-            </CardHeader>
-            <CardContent className="pb-3">
-              <div className="space-y-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Tomatoes</span>
-                  <div className="flex items-center text-emerald-600 text-sm">
-                    <ArrowUpDown className="h-3 w-3 mr-1" />
-                    +12.5%
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Corn</span>
-                  <div className="flex items-center text-emerald-600 text-sm">
-                    <ArrowUpDown className="h-3 w-3 mr-1" />
-                    +8.2%
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Peppers</span>
-                  <div className="flex items-center text-red-500 text-sm">
-                    <ArrowUpDown className="h-3 w-3 mr-1" />
-                    -3.1%
-                  </div>
-                </div>
-              </div>
-              <Button variant="ghost" size="sm" className="w-full mt-3 text-xs">
-                <BarChart2 className="h-3 w-3 mr-1" />
-                View Full Report
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
         <Tabs defaultValue="current" onValueChange={setActiveTab} className="w-full">
-          <div className={`${isMobile ? 'overflow-x-auto pb-2' : ''} flex items-center justify-between mb-4`}>
-            <TabsList className={`${isMobile ? 'w-[400px]' : 'w-[400px] md:w-auto'}`}>
-              <TabsTrigger value="current">Current Inventory</TabsTrigger>
-              <TabsTrigger value="sold">Sold History</TabsTrigger>
-            </TabsList>
-            <div className="hidden md:flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                <Filter className="h-4 w-4" />
-                Filter
-              </Button>
-            </div>
-          </div>
+          <TabsList className={`${isMobile ? 'w-[400px]' : 'w-[400px] md:w-auto'}`}>
+            <TabsTrigger value="current">Current Inventory</TabsTrigger>
+            <TabsTrigger value="sold">Sold History</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="current" className="mt-0">
             <Card>
@@ -277,7 +210,6 @@ export default function ProducePage() {
                         <TableHead>Available</TableHead>
                         <TableHead className="hidden md:table-cell">Price per Unit</TableHead>
                         <TableHead className="hidden lg:table-cell">Certifications</TableHead>
-                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -292,66 +224,11 @@ export default function ProducePage() {
                               of {item.quantity} {item.unit}
                             </div>
                           </TableCell>
-                          <TableCell className="hidden md:table-cell">${item.price}/{item.unit}</TableCell>
+                          <TableCell className="hidden md:table-cell">₦{item.price}/{item.unit}</TableCell>
                           <TableCell className="hidden lg:table-cell">
                             <div className="flex flex-wrap gap-1">
                               {item.certifications.map(cert => (
-                                <Badge key={cert} variant="outline" className="text-xs">
-                                  {cert}
-                                </Badge>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="sm">Edit</Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <div className="text-sm text-muted-foreground">
-                  Showing {filteredProduceItems.length} items
-                </div>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="sold" className="mt-0">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sold Produce History</CardTitle>
-                <CardDescription>History of your sold produce items</CardDescription>
-              </CardHeader>
-              <CardContent className="px-0 sm:px-6">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="hidden md:table-cell">Variety</TableHead>
-                        <TableHead className="hidden lg:table-cell">Harvest Date</TableHead>
-                        <TableHead>Quantity Sold</TableHead>
-                        <TableHead className="hidden md:table-cell">Price per Unit</TableHead>
-                        <TableHead className="hidden lg:table-cell">Certifications</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredProduceItems.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="font-medium">{item.name}</TableCell>
-                          <TableCell className="hidden md:table-cell">{item.variety}</TableCell>
-                          <TableCell className="hidden lg:table-cell">{item.harvestDate}</TableCell>
-                          <TableCell>{item.quantity} {item.unit}</TableCell>
-                          <TableCell className="hidden md:table-cell">${item.price}/{item.unit}</TableCell>
-                          <TableCell className="hidden lg:table-cell">
-                            <div className="flex flex-wrap gap-1">
-                              {item.certifications.map(cert => (
-                                <Badge key={cert} variant="outline" className="text-xs">
-                                  {cert}
-                                </Badge>
+                                <Badge key={cert} variant="outline" className="text-xs">{cert}</Badge>
                               ))}
                             </div>
                           </TableCell>
@@ -361,11 +238,6 @@ export default function ProducePage() {
                   </Table>
                 </div>
               </CardContent>
-              <CardFooter>
-                <div className="text-sm text-muted-foreground">
-                  Showing {filteredProduceItems.length} items
-                </div>
-              </CardFooter>
             </Card>
           </TabsContent>
         </Tabs>
