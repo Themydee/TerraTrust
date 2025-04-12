@@ -13,7 +13,8 @@ const produceSchema = new mongoose.Schema(
         quantity:{
             type: Number,
             required: true,
-        },
+            min: [1, "Quantity must be at least 1"],
+        },  
         availableQuantity: {
             type: Number,
             default: function () {
@@ -31,7 +32,8 @@ const produceSchema = new mongoose.Schema(
             type: Date,
         },
         certifications:{
-            type: String,
+            type: [String],
+            default: [],
         },
         status: {
             type: String,

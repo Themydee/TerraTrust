@@ -48,14 +48,19 @@ export default function ProducePage() {
     const fetchProduceData = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/produce/fetch");
+        if (!response.ok) {
+          throw new Error("Failed to fetch produce data");
+        }
         const data = await response.json();
         setProduceItems(data);
       } catch (error) {
         console.error("Error fetching produce data:", error);
+        alert("Something went wrong while fetching data.");
       } finally {
         setLoading(false);
       }
     };
+    
 
     fetchProduceData();
   }, []);
@@ -72,7 +77,7 @@ export default function ProducePage() {
         harvestDate,
         certifications,
         availableQuantity: quantity,
-        status: "available", // Ensure the status is set
+        status: "available", 
       };
 
       const response = await fetch("http://localhost:5000/api/produce/add", {
@@ -113,6 +118,7 @@ export default function ProducePage() {
       return item.status === "sold";
     })
   : [];
+
 
   return (
     <DashboardLayout requiredRoles={["farmer"]}>
