@@ -1,5 +1,5 @@
 
-# TerraTrust 🌱
+# TerraTrust  //still looking for a name to avoid copyright infrigment🌱
 
 TerraTrust is an agri tech startup aimed at improving the supply chain system in Africa. TerraTrust main approach is of three key areas
 - Helping farmers easily gain access to Credit loans from credit facilities
