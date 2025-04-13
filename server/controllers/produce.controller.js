@@ -27,3 +27,44 @@ export const fetchProduce = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+export const updateProduce = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+
+        const updateProduce = await Produce.findByIdAndUpdate(id, updateData, {
+            new: true,
+        });
+
+        if(!updateProduce) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Product updated successfully",
+            produce: updateProduce,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+export const deleteProduce = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const deletedProduce = await Produce.findByIdAndDelete(id);
+
+        if(!deletedProduce) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Product deleted successfully",
+            produce: deletedProduce,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

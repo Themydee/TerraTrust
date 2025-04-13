@@ -18,6 +18,7 @@ import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ProduceItem {
+  _id: any;
   name: string;
   variety: string;
   quantity: number;
@@ -43,6 +44,8 @@ export default function ProducePage() {
   const [certifications, setCertifications] = useState<string[]>([]);
   const [loadingAdd, setLoadingAdd] = useState(false);
   const isMobile = useIsMobile();
+  const [editProduce, setEditProduce] = useState<ProduceItem | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchProduceData = async () => {
@@ -52,7 +55,8 @@ export default function ProducePage() {
           throw new Error("Failed to fetch produce data");
         }
         const data = await response.json();
-        setProduceItems(data);
+        console.log("Fetched data:", data);
+        setProduceItems(Array.isArray(data.produce) ? data.produce : []); // Ensure it's an array
       } catch (error) {
         console.error("Error fetching produce data:", error);
         alert("Something went wrong while fetching data.");
@@ -60,7 +64,6 @@ export default function ProducePage() {
         setLoading(false);
       }
     };
-    
 
     fetchProduceData();
   }, []);
@@ -77,7 +80,8 @@ export default function ProducePage() {
         harvestDate,
         certifications,
         availableQuantity: quantity,
-        status: "available", 
+        status: "available",
+        _id: undefined
       };
 
       const response = await fetch("http://localhost:5000/api/produce/add", {
@@ -119,6 +123,80 @@ export default function ProducePage() {
     })
   : [];
 
+  const handleUpdateProduce = async () => {
+    if (!editProduce) return;
+  
+    try {
+      const response = await fetch(`http://localhost:5000/api/produce/update/${editProduce.id || editProduce._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editProduce),
+      });
+  
+      if (response.ok) {
+        const updatedProduce = await response.json();
+        console.log("Updated produce:", updatedProduce);
+  
+        // Update the produceItems state
+        setProduceItems((prevItems) =>
+          prevItems.map((item) =>
+            item.id === updatedProduce.id || item._id === updatedProduce._id ? updatedProduce : item
+          )
+        );
+  
+        setIsEditDialogOpen(false);
+        setEditProduce(null);
+      } else {
+        console.error("Error updating produce:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error updating produce:", error);
+    }
+  };
+
+  const handleEditClick = (produce: ProduceItem) => {
+    setEditProduce(produce);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDeleteProduce = async (id: any) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/produce/delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setProduceItems((prevItems) => prevItems.filter((item) => item._id !== id));
+      } else {
+        console.error("Error deleting produce:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error deleting produce:", error);
+    }
+  };
+
+  const handleUpdateStatus = async (id: any, status: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/produce/update-status/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+
+      if (response.ok) {
+        const updatedProduce = await response.json();
+        setProduceItems((prevItems) =>
+          prevItems.map((item) =>
+            item._id === id ? { ...item, status } : item
+          )
+        );
+      } else {
+        console.error("Error updating status:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
 
   return (
     <DashboardLayout requiredRoles={["farmer"]}>
@@ -219,27 +297,61 @@ export default function ProducePage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredProduceItems.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="font-medium">{item.name}</TableCell>
-                          <TableCell className="hidden md:table-cell">{item.variety}</TableCell>
-                          <TableCell className="hidden lg:table-cell">{item.harvestDate}</TableCell>
-                          <TableCell>
-                            {item.availableQuantity} {item.unit}
-                            <div className="text-xs text-muted-foreground">
-                              of {item.quantity} {item.unit}
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">₦{item.price}/{item.unit}</TableCell>
-                          <TableCell className="hidden lg:table-cell">
-                            <div className="flex flex-wrap gap-1">
-                              {item.certifications.map(cert => (
-                                <Badge key={cert} variant="outline" className="text-xs">{cert}</Badge>
-                              ))}
-                            </div>
+                      {Array.isArray(produceItems) && produceItems.length > 0 ? (
+                        produceItems.map((item, index) => (
+                          <TableRow key={item._id || index}>
+                            <TableCell className="font-medium">{item.name}</TableCell>
+                            <TableCell className="hidden md:table-cell">{item.variety}</TableCell>
+                            <TableCell className="hidden lg:table-cell">{item.harvestDate}</TableCell>
+                            <TableCell>
+                              {item.availableQuantity} {item.unit}
+                              <div className="text-xs text-muted-foreground">
+                                of {item.quantity} {item.unit}
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">₦{item.price}/{item.unit}</TableCell>
+                            <TableCell className="hidden lg:table-cell">
+                              <div className="flex flex-wrap gap-1">
+                                {Array.isArray(item.certifications) &&
+                                  item.certifications.map((cert, certIndex) => (
+                                    <Badge key={certIndex} variant="outline" className="text-xs">{cert}</Badge>
+                                  ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditClick(item)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteProduce(item._id)}
+                              >
+                                Delete
+                              </Button>
+                              {item.status === "available" && (
+                                <Button
+                                  variant="success"
+                                  size="sm"
+                                  onClick={() => handleUpdateStatus(item._id, "sold")}
+                                >
+                                  Mark as Sold
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center">
+                            No produce items available.
                           </TableCell>
                         </TableRow>
-                      ))}
+                      )}
                     </TableBody>
                   </Table>
                 </div>
@@ -248,6 +360,71 @@ export default function ProducePage() {
           </TabsContent>
         </Tabs>
       </div>
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Produce</DialogTitle>
+            <DialogDescription>Update the details of your produce item.</DialogDescription>
+          </DialogHeader>
+          {editProduce && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-name" className="text-right">Name</Label>
+                <Input
+                  id="edit-name"
+                  className="col-span-3"
+                  value={editProduce.name}
+                  onChange={(e) => setEditProduce({ ...editProduce, name: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-variety" className="text-right">Variety</Label>
+                <Input
+                  id="edit-variety"
+                  className="col-span-3"
+                  value={editProduce.variety}
+                  onChange={(e) => setEditProduce({ ...editProduce, variety: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-quantity" className="text-right">Quantity</Label>
+                <Input
+                  id="edit-quantity"
+                  type="number"
+                  className="col-span-3"
+                  value={editProduce.quantity}
+                  onChange={(e) => setEditProduce({ ...editProduce, quantity: Number(e.target.value) })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-price" className="text-right">Price</Label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  className="col-span-3"
+                  value={editProduce.price}
+                  onChange={(e) => setEditProduce({ ...editProduce, price: Number(e.target.value) })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-harvest-date" className="text-right">Harvest Date</Label>
+                <Input
+                  id="edit-harvest-date"
+                  type="date"
+                  className="col-span-3"
+                  value={editProduce.harvestDate}
+                  onChange={(e) => setEditProduce({ ...editProduce, harvestDate: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button type="button" onClick={handleUpdateProduce}>
+              Update Produce
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
