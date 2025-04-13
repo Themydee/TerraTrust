@@ -1,5 +1,5 @@
 
-# TerraTrust 🌱
+# TerraTrust  //still looking for a name to avoid copyright infrigment🌱
 
 TerraTrust is an agri tech startup aimed at improving the supply chain system in Africa. TerraTrust main approach is of three key areas
 - Helping farmers easily gain access to Credit loans from credit facilities
@@ -75,9 +75,6 @@ MONGO_URI=mongodb+srv://your_db_url
 
 JWT_SECRET=your_jwt_secret
 
-INFURA_API_KEY=your_infura_key
-
-PRIVATE_KEY=your_wallet_private_key
 
 4️⃣ Start the Development Server
 
@@ -101,13 +98,7 @@ Frontend: http://localhost:3000
 
 Backend API: http://localhost:5000/api
 
-6️⃣ Blockchain & Smart Contract Setup (Optional)
 
-cd blockchain
-
-npx hardhat 
-
-run scripts/deploy.js --network rinkeby
 
 7️⃣ Running Tests
 
@@ -155,7 +146,6 @@ Backend: Deploy on Vercel or AWS
 
 Database: Use MongoDB Atlas for cloud hosting
 
-Blockchain Smart Contracts: Deploy on Ethereum Testnet
 
 Contributing
 
