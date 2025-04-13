@@ -68,3 +68,33 @@ export const deleteProduce = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+export const updateProduceStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        // Validate the status
+        if (!["available", "sold"].includes(status)) {
+            return res.status(400).json({ message: "Invalid status value" });
+        }
+
+        const updatedProduce = await Produce.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        );
+
+        if (!updatedProduce) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Status updated successfully",
+            produce: updatedProduce,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

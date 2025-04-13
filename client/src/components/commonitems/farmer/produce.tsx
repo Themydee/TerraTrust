@@ -81,7 +81,7 @@ export default function ProducePage() {
         certifications,
         availableQuantity: quantity,
         status: "available",
-        _id: undefined
+        _id: undefined,
       };
 
       const response = await fetch("http://localhost:5000/api/produce/add", {
@@ -93,8 +93,11 @@ export default function ProducePage() {
       if (response.ok) {
         const addedProduce = await response.json();
         console.log("Added produce:", addedProduce);
-        setProduceItems((prevItems) => (Array.isArray(prevItems) ? [...prevItems, addedProduce] : [addedProduce]));
-        console.log("Updated produce items:", produceItems);
+
+        // Update the state immediately
+        setProduceItems((prevItems) => [...prevItems, addedProduce.produce]);
+
+        // Reset the form
         resetForm();
       } else {
         console.error("Error adding produce:", response.statusText);
@@ -175,19 +178,22 @@ export default function ProducePage() {
     }
   };
 
-  const handleUpdateStatus = async (id: any, status: string) => {
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/produce/update-status/${id}`, {
-        method: "PUT",
+      const response = await fetch(`http://localhost:5000/api/produce/status/${id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status: newStatus }),
       });
-
+  
       if (response.ok) {
         const updatedProduce = await response.json();
+        console.log("Updated status:", updatedProduce);
+  
+        // Update the produceItems state
         setProduceItems((prevItems) =>
           prevItems.map((item) =>
-            item._id === id ? { ...item, status } : item
+            item._id === updatedProduce.produce._id ? updatedProduce.produce : item
           )
         );
       } else {
@@ -205,61 +211,63 @@ export default function ProducePage() {
           <DashboardTitle title="My Produce" description="Manage your agricultural produce inventory" />
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 w-full sm:w-auto">
-                <Plus className="h-4 w-4" />
-                Add New Produce
+              <Button variant="default">
+                <Plus className="mr-2 h-4 w-4" /> Add Produce
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Add New Produce</DialogTitle>
-                <DialogDescription>Enter the details of your new produce item.</DialogDescription>
+                <DialogTitle>Add Produce</DialogTitle>
+                <DialogDescription>Fill in the details to add a new produce item.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">Name</Label>
-                  <Input id="name" placeholder="Tomatoes, Corn, etc." className="col-span-3" value={name} onChange={(e) => setName(e.target.value)} />
+                  <Input
+                    id="name"
+                    className="col-span-3"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="variety" className="text-right">Variety</Label>
-                  <Input id="variety" placeholder="Roma, Golden Bantam, etc." className="col-span-3" value={variety} onChange={(e) => setVariety(e.target.value)} />
+                  <Input
+                    id="variety"
+                    className="col-span-3"
+                    value={variety}
+                    onChange={(e) => setVariety(e.target.value)}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="quantity" className="text-right">Quantity</Label>
-                  <Input id="quantity" type="number" className="col-span-2" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
-                  <Select defaultValue="kg" onValueChange={setUnit}>
-                    <SelectTrigger id="unit">
-                      <SelectValue placeholder="Unit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="kg">kg</SelectItem>
-                      <SelectItem value="lb">lb</SelectItem>
-                      <SelectItem value="ton">ton</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    className="col-span-3"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Number(e.target.value))}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="price" className="text-right">Price (₦)</Label>
-                  <Input id="price" type="number" className="col-span-3" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
+                  <Label htmlFor="price" className="text-right">Price</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    className="col-span-3"
+                    value={price}
+                    onChange={(e) => setPrice(Number(e.target.value))}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="harvest-date" className="text-right">Harvest Date</Label>
-                  <Input id="harvest-date" type="date" className="col-span-3" value={harvestDate} onChange={(e) => setHarvestDate(e.target.value)} />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="certifications" className="text-right">Certifications</Label>
-                  <Select onValueChange={(value) => setCertifications(value ? [value] : [])}>
-                    <SelectTrigger id="certifications" className="col-span-3">
-                      <SelectValue placeholder="Select certifications" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="organic">Organic</SelectItem>
-                      <SelectItem value="fairtrade">Fair Trade</SelectItem>
-                      <SelectItem value="pesticidefree">Pesticide-free</SelectItem>
-                      <SelectItem value="nongmo">Non-GMO</SelectItem>
-                      <SelectItem value="local">Local</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="harvest-date"
+                    type="date"
+                    className="col-span-3"
+                    value={harvestDate}
+                    onChange={(e) => setHarvestDate(e.target.value)}
+                  />
                 </div>
               </div>
               <DialogFooter>
@@ -271,92 +279,76 @@ export default function ProducePage() {
           </Dialog>
         </div>
 
-        <Tabs defaultValue="current" onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`${isMobile ? 'w-[400px]' : 'w-[400px] md:w-auto'}`}>
-            <TabsTrigger value="current">Current Inventory</TabsTrigger>
-            <TabsTrigger value="sold">Sold History</TabsTrigger>
+        <Tabs defaultValue="current">
+          <TabsList>
+            <TabsTrigger value="current">Current Products</TabsTrigger>
+            <TabsTrigger value="history">Product History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="current" className="mt-0">
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Produce Inventory</CardTitle>
-                <CardDescription>Manage your available produce items</CardDescription>
-              </CardHeader>
-              <CardContent className="px-0 sm:px-6">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="hidden md:table-cell">Variety</TableHead>
-                        <TableHead className="hidden lg:table-cell">Harvest Date</TableHead>
-                        <TableHead>Available</TableHead>
-                        <TableHead className="hidden md:table-cell">Price per Unit</TableHead>
-                        <TableHead className="hidden lg:table-cell">Certifications</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {Array.isArray(produceItems) && produceItems.length > 0 ? (
-                        produceItems.map((item, index) => (
-                          <TableRow key={item._id || index}>
-                            <TableCell className="font-medium">{item.name}</TableCell>
-                            <TableCell className="hidden md:table-cell">{item.variety}</TableCell>
-                            <TableCell className="hidden lg:table-cell">{item.harvestDate}</TableCell>
-                            <TableCell>
-                              {item.availableQuantity} {item.unit}
-                              <div className="text-xs text-muted-foreground">
-                                of {item.quantity} {item.unit}
-                              </div>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">₦{item.price}/{item.unit}</TableCell>
-                            <TableCell className="hidden lg:table-cell">
-                              <div className="flex flex-wrap gap-1">
-                                {Array.isArray(item.certifications) &&
-                                  item.certifications.map((cert, certIndex) => (
-                                    <Badge key={certIndex} variant="outline" className="text-xs">{cert}</Badge>
-                                  ))}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditClick(item)}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => handleDeleteProduce(item._id)}
-                              >
-                                Delete
-                              </Button>
-                              {item.status === "available" && (
-                                <Button
-                                  variant="success"
-                                  size="sm"
-                                  onClick={() => handleUpdateStatus(item._id, "sold")}
-                                >
-                                  Mark as Sold
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center">
-                            No produce items available.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Current Products */}
+          <TabsContent value="current">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Variety</TableHead>
+                  <TableHead>Harvest Date</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {produceItems
+                  .filter((item) => item.status === "available")
+                  .map((item) => (
+                    <TableRow key={item._id}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell>{item.variety}</TableCell>
+                      <TableCell>{item.harvestDate}</TableCell>
+                      <TableCell>{item.availableQuantity} {item.unit}</TableCell>
+                      <TableCell>₦{item.price}/{item.unit}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleUpdateStatus(item._id, "sold")}
+                        >
+                          Mark as Sold
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TabsContent>
+
+          {/* Product History */}
+          <TabsContent value="history">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Variety</TableHead>
+                  <TableHead>Harvest Date</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Price</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {produceItems
+                  .filter((item) => item.status === "sold")
+                  .map((item) => (
+                    <TableRow key={item._id}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell>{item.variety}</TableCell>
+                      <TableCell>{item.harvestDate}</TableCell>
+                      <TableCell>{item.availableQuantity} {item.unit}</TableCell>
+                      <TableCell>₦{item.price}/{item.unit}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
           </TabsContent>
         </Tabs>
       </div>
