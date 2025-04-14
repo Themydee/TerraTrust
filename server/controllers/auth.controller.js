@@ -73,13 +73,13 @@ export const login = async (req, res) => {
       
       // If no user found
       if (!user) {
-          return res.status(400).json({ success: false, message: "Invalid credentials" });
+          return res.status(400).json({ success: false, message: "Invalid  Email" });
       }
 
       // Check if the password matches the hashed password
       const passwordMatches = await bcryptjs.compare(password, user.password);
       if (!passwordMatches) {
-          return res.status(400).json({ success: false, message: "Invalid credentials" });
+          return res.status(400).json({ success: false, message: "Invalid Password" });
       }
 
       // Generate the JWT token here
@@ -90,10 +90,10 @@ export const login = async (req, res) => {
       );
 
       // Set token in a cookie (optional)
-      res.cookie("token", token, {
-          httpOnly: true,  
-          maxAge: 3600000, // 1 hour
-      });
+        res.cookie("token", token, {
+            httpOnly: true,  
+            maxAge: 3600000, // 1 hour
+        });
 
       // Update the user's last login
       user.lastLogin = new Date();
@@ -134,9 +134,7 @@ export const verifyEmail = async (req, res) => {
   const { code } = req.body;
 
   try {
-    // Debug: log received code
-    console.log("Received verification code:", code);
-
+    
     const user = await User.findOne({
       verificationToken: code,
       verificationTokenExpiresAt: { $gt: Date.now() },
@@ -170,7 +168,7 @@ export const verifyEmail = async (req, res) => {
       user: {
         _id: user._id,
         name: user.name,
-        email: user.email,
+        email: user.email,  
         role: user.role,
         isVerified: user.isVerified,
         lastLogin: user.lastLogin,

@@ -174,11 +174,11 @@ If you have any feedback, please reach out to us at nifetemiboy@gmail.com
 
 ## DEMO HERE
 
-<img width="1436" alt="img" src="./demo-assets/1.png" />
-<img width="1436" alt="img" src="./demo-assets/2.png" />
-<img width="1436" alt="img" src="./demo-assets/3.png" />
-<img width="1436" alt="img" src="./demo-assets/4.png" />
-<img width="1436" alt="img" src="./demo-assets/5.png" />
-<img width="1436" alt="img" src="./demo-assets/6.png" />
-<img width="1436" alt="img" src="./demo-assets/7.png" />
+<img width="1436" alt="img" src="./client/demo-assets/1.png" />
+<img width="1436" alt="img" src="./client//demo-assets/2.png" />
+<img width="1436" alt="img" src="./client/demo-assets/3.png" />
+<img width="1436" alt="img" src="./client/demo-assets/4.png" />
+<img width="1436" alt="img" src="./client/demo-assets/5.png" />
+<img width="1436" alt="img" src="./client/demo-assets/6.png" />
+<img width="1436" alt="img" src="./client/demo-assets/7.png" />
 

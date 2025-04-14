@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/navigation/Navbar";
 import { Sidebar } from "@/components/navigation/Sidebar";
-import { UserRole } from "@/types/user";
+import { UserRole } from "../../types/user";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardLayoutProps {
