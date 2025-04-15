@@ -1,0 +1,18 @@
+# Base image
+FROM node:18
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy source files
+COPY . .
+
+# Expose backend port (adjust if you use a different one)
+EXPOSE 5000
+
+# Start the server
+CMD ["npm", "run", "start"]
